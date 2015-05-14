@@ -42,7 +42,7 @@ public class PLA {
                 toAdd.val = lineClassify(toAdd, b, m);
                 points.add(toAdd);
             }
-            try {
+            try { // to make sure points are in fact linearally separable
                 OutputStream output = Files.newOutputStream(Paths.get("pointOutput.csv"));
                 output.write(("x,y,val\n").getBytes(Charset.defaultCharset()));
                 for (Point p : points) {
