@@ -16,41 +16,68 @@ public class LinRegImplementation {
 
     public static void main(String[] args) {
         int N = 100;
-        ArrayList<Double> propIncorrect = new ArrayList<>();
+        int Ntest = 1000;
+        ArrayList<Double> propIncorrectTrain = new ArrayList<>();
+        ArrayList<Double> propIncorrectTest= new ArrayList<>();
         for (int j = 0; j < 1000; j++) {
-            Point [] realLine = {genRanPoint(), genRanPoint()};
-            double m = (realLine[0].y - realLine[1].y)/(realLine[0].x - realLine[1].x); // slope
-            double b = realLine[0].y - realLine[0].x*m;
-            double[][] randPoints = new double[N][3];
-            double[][] realClasses = new double[N][1];
-            for (int i = 0; i < N; i++) {
-                double[] newPoint = {Math.random() * 2 - 1, Math.random() * 2 - 1};
-                randPoints[i][0] = 1;
-                randPoints[i][1] = newPoint[0];
-                randPoints[i][2] = newPoint[1];
-                realClasses[i][0] = lineClassify(newPoint, b, m);
-            }
+            // Generate real separating line
+            double [] realLine = genRandomLine();
+
+            // Generate training data and test data
+            double[][] randPoints = genRandomPoints(N, 2);
+            double[][] realClasses = getPointClasses(randPoints, realLine);
+            double[][] testData = genRandomPoints(Ntest, 2);
+            double[][] testClass = getPointClasses(testData, realLine);
+
+            // Estimate parameters, note: .inverse() calculates pseudoinverse if inverse isn't possible
             Matrix inputs = Matrix.constructWithCopy(randPoints);
             Matrix output = Matrix.constructWithCopy(realClasses);
-            Matrix inputsT = inputs.transpose();
-//            Matrix weights = inputsT.times(inputs).inverse().times(inputsT).times(output);
             Matrix weights = inputs.inverse().times(output);
-//            weights = weights.inverse();
-//            weights.arrayTimesEquals(inputsT);
-//            weights.arrayTimesEquals(output);
-            double outputNums[][] = inputs.times(weights).getArray();
-            double outputsEstim[] = Arrays.stream(outputNums).map(n -> n[0] > 0 ? 1.0 : 0.0).mapToDouble(Double::doubleValue).toArray();
-//            Arrays.stream(outputNums).forEach(n -> {
-//                System.out.println(n + " " + n[0]);
-//            });
-            int numIncorrect = 0;
-            for (int i = 0; i < outputsEstim.length; i++)
-                if (realClasses[i][0] != outputsEstim[i])
-                    numIncorrect++;
-            propIncorrect.add((double) numIncorrect / N);
+
+            // Estimating error in training/test set
+            propIncorrectTrain.add(evaluate(inputs, realClasses, weights));
+            Matrix inputTest = Matrix.constructWithCopy(testData);
+            propIncorrectTest.add(evaluate(inputTest, testClass, weights));
         }
 
-        System.out.println("\n" + propIncorrect.stream().mapToDouble(Double::doubleValue).average().getAsDouble());
+        System.out.println("Average training set error:\t" + propIncorrectTrain.stream().mapToDouble(Double::doubleValue).average().getAsDouble());
+        System.out.println("Average test set error:\t" + propIncorrectTest.stream().mapToDouble(Double::doubleValue).average().getAsDouble());
+    }
+
+    public static double[][] genRandomPoints(int n, int cols) {
+        double[][] inputs =  new double [n][cols+1];
+        for (int i = 0; i < n; i++) {
+            double[] newPoint = {Math.random() * 2 - 1, Math.random() * 2 - 1};
+            inputs[i][0] = 1;
+            inputs[i][1] = newPoint[0];
+            inputs[i][2] = newPoint[1];
+        }
+        return inputs;
+    }
+
+    public static double[][] getPointClasses(double[][] inputs, double[] realLine) {
+        double[][] realClass = new double [inputs.length][1];
+        for (int i = 0; i < inputs.length; i++) {
+            realClass[i][0] = lineClassify(new double[] {inputs[i][0], inputs[i][1]}, realLine[1], realLine[0]);
+        }
+        return realClass;
+    }
+
+    public static double[] genRandomLine() {
+        Point [] realLine = {genRanPoint(), genRanPoint()};
+        double m = (realLine[0].y - realLine[1].y)/(realLine[0].x - realLine[1].x); // slope
+        double b = realLine[0].y - realLine[0].x*m;
+        return new double [] {m, b};
+    }
+
+    public static double evaluate(Matrix input, double[][] realClasses, Matrix weights) {
+        double scores[][] = input.times(weights).getArray();
+        double estimClass[] = Arrays.stream(scores).map(n -> n[0] > 0 ? 1.0 : 0.0).mapToDouble(Double::doubleValue).toArray();
+        int numIncorrect = 0;
+        for (int i = 0; i < estimClass.length; i++)
+            if (estimClass[i] != realClasses[i][0])
+                numIncorrect++;
+        return (double) numIncorrect/estimClass.length;
     }
 
 

@@ -80,8 +80,8 @@ public class PLA {
                     /estimGError.size());
         }
         System.out.println(counters);
-        System.out.println((double) counters.stream().mapToInt(Integer::intValue).sum() / counters.size());
-        System.out.println(propDiffs.stream().mapToDouble(Double::doubleValue).sum()/propDiffs.size());
+        System.out.println(counters.stream().mapToInt(Integer::intValue).average().getAsDouble());
+        System.out.println(propDiffs.stream().mapToDouble(Double::doubleValue).average().getAsDouble());
     }
 
     public static Point genRanPoint() {
