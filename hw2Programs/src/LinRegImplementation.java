@@ -34,6 +34,10 @@ public class LinRegImplementation {
             Matrix output = Matrix.constructWithCopy(realClasses);
             Matrix weights = inputs.inverse().times(output);
 
+            // How to estimate parameters without .inverse() pseudoinverse shortcut
+//            Matrix inputsT = inputs.transpose();
+//            Matrix weights = inputsT.times(inputs).inverse().times(inputsT).times(output);
+
             // Estimating error in training/test set
             propIncorrectTrain.add(evaluate(inputs, realClasses, weights));
             Matrix inputTest = Matrix.constructWithCopy(testData);
@@ -47,10 +51,9 @@ public class LinRegImplementation {
     public static double[][] genRandomPoints(int n, int cols) {
         double[][] inputs =  new double [n][cols+1];
         for (int i = 0; i < n; i++) {
-            double[] newPoint = {Math.random() * 2 - 1, Math.random() * 2 - 1};
-            inputs[i][0] = 1;
-            inputs[i][1] = newPoint[0];
-            inputs[i][2] = newPoint[1];
+            inputs[i][0] = 1; // added so we can treat threshold as w_0
+            inputs[i][1] = Math.random() * 2 - 1;
+            inputs[i][2] = Math.random() * 2 - 1;
         }
         return inputs;
     }
@@ -70,9 +73,13 @@ public class LinRegImplementation {
         return new double [] {m, b};
     }
 
-    public static double evaluate(Matrix input, double[][] realClasses, Matrix weights) {
+    public static double[] predict(Matrix input, Matrix weights) {
         double scores[][] = input.times(weights).getArray();
-        double estimClass[] = Arrays.stream(scores).map(n -> n[0] > 0 ? 1.0 : 0.0).mapToDouble(Double::doubleValue).toArray();
+        return Arrays.stream(scores).map(n -> n[0] > 0 ? 1.0 : 0.0).mapToDouble(Double::doubleValue).toArray();
+    }
+
+    public static double evaluate(Matrix input, double[][] realClasses, Matrix weights) {
+        double estimClass[] = predict(input, weights);
         int numIncorrect = 0;
         for (int i = 0; i < estimClass.length; i++)
             if (estimClass[i] != realClasses[i][0])
