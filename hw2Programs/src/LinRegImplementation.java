@@ -29,10 +29,20 @@ public class LinRegImplementation {
             double[][] testData = genRandomPoints(Ntest, 2);
             double[][] testClass = getPointClasses(testData, realLine);
 
+            // Insert output noise
+            for (int i = 0; i < N/10; i++) {
+                int randIndex = (int)(Math.random()*N);
+                if (realClasses[randIndex][0] == 0)
+                    realClasses[randIndex][0] = 1;
+                else
+                    realClasses[randIndex][0] = 0;
+            }
+
             // Estimate parameters, note: .inverse() calculates pseudoinverse if inverse isn't possible
             Matrix inputs = Matrix.constructWithCopy(randPoints);
             Matrix output = Matrix.constructWithCopy(realClasses);
             Matrix weights = inputs.inverse().times(output);
+
 
             // How to estimate parameters without .inverse() pseudoinverse shortcut
 //            Matrix inputsT = inputs.transpose();

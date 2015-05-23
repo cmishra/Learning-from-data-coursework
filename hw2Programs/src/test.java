@@ -9,6 +9,10 @@ public class test {
         double test [][] = {{1, 2}, {3, 4}};
         Arrays.stream(test).forEach(p -> System.out.println(p[0] + "" + p[1]));
 //        test[0]={5, 6} confirmed hat this doesn't work
+
+        System.out.println(Math.pow(3, 4));
+
+        System.out.println(test[1]);
     }
 
 }
