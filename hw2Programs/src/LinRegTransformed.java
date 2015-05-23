@@ -32,9 +32,14 @@ public class LinRegTransformed {
             for (int i = 0; i < 6; i++) {
                 weightArr[i][j] = weights.getArray()[i][0];
             }
+
+            // Estimate error on test set
+            normalReg.add(LinRegImplementation.evaluate(Matrix.constructWithCopy(expandedTest), testClass, weights));
         }
         double[] avgWeights = Arrays.stream(weightArr).mapToDouble(w -> Arrays.stream(w).average().getAsDouble()).toArray();
         printArr(avgWeights);
+        System.out.println("Average proportion of test sets misclassified: " +
+                normalReg.stream().mapToDouble(Double::doubleValue).average().getAsDouble());
     }
 
     public static double[][] assignClassWithNoise(double[][] training, int N) {

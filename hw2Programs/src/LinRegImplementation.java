@@ -29,15 +29,6 @@ public class LinRegImplementation {
             double[][] testData = genRandomPoints(Ntest, 2);
             double[][] testClass = getPointClasses(testData, realLine);
 
-            // Insert output noise
-            for (int i = 0; i < N/10; i++) {
-                int randIndex = (int)(Math.random()*N);
-                if (realClasses[randIndex][0] == 0)
-                    realClasses[randIndex][0] = 1;
-                else
-                    realClasses[randIndex][0] = 0;
-            }
-
             // Estimate parameters, note: .inverse() calculates pseudoinverse if inverse isn't possible
             Matrix inputs = Matrix.constructWithCopy(randPoints);
             Matrix output = Matrix.constructWithCopy(realClasses);
@@ -85,7 +76,7 @@ public class LinRegImplementation {
 
     public static double[] predict(Matrix input, Matrix weights) {
         double scores[][] = input.times(weights).getArray();
-        return Arrays.stream(scores).map(n -> n[0] > 0 ? 1.0 : 0.0).mapToDouble(Double::doubleValue).toArray();
+        return Arrays.stream(scores).map(n -> n[0] > 0 ? 1.0 : -1.0).mapToDouble(Double::doubleValue).toArray();
     }
 
     public static double evaluate(Matrix input, double[][] realClasses, Matrix weights) {
@@ -102,7 +93,7 @@ public class LinRegImplementation {
         if (p[1] > (b+ m*p[0]))
             return 1.0;
         else
-            return 0.0;
+            return -1.0;
     }
 
     // from PLA.java in HW1 - PLA Implementation
