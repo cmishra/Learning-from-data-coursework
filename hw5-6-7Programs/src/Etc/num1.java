@@ -1,6 +1,6 @@
 package Etc;
 
-import RegressionSuite.Utilities;
+import SupervisedModels.Utilities;
 
 import java.util.Scanner;
 
